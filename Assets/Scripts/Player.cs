@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class Player : MonoBehaviour
 {
     private CharacterController charController;
+    public static Player instance;
     [SerializeField] float speed;
 
     [SerializeField] Transform personalCamera;
@@ -16,6 +17,7 @@ public class Player : MonoBehaviour
 
     void Awake()
     {
+        instance = this;
         charController = GetComponent<CharacterController>();
     }
 
@@ -42,18 +44,17 @@ public class Player : MonoBehaviour
     {
         if (other.CompareTag("Falling Platform"))
         {
-            Debug.Log($"trigger drop: {other.name}");
-            StartCoroutine(PlatformFall(other.transform));
+            Maze2Cell cell = other.GetComponent<Maze2Cell>();
+            if (!cell.shrinking)
+            {
+                cell.shrinking = true;
+                StartCoroutine(cell.ShrinkAway());
+            }
+        }
+        else if (other.CompareTag("Jewel"))
+        {
+            Destroy(other.gameObject);
         }
     }
 
-    IEnumerator PlatformFall(Transform platform)
-    {
-        yield return new WaitForSeconds(0.5f);
-        while (true)
-        {
-            platform.transform.Translate(Vector3.down);
-            yield return null;
-        }
-    }
 }

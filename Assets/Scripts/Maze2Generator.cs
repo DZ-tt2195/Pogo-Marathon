@@ -5,19 +5,13 @@ using UnityEngine;
 public class Maze2Generator : MonoBehaviour
 {
 	//Prefab database
-	[SerializeField]
-    PrefabDatabase prefabDB;
+	[SerializeField] PrefabDatabase prefabDB;
 	//Map size
-	[SerializeField]
-    int mazeX = 59;
-    [SerializeField]
-    int mazeY = 59;
-	//Container
-	[SerializeField]
-    Transform mazeGroup;
+	[SerializeField] int mazeX;
+    [SerializeField] int mazeY;
 
-	//Prefab instances 2D array
-	Maze2Cell[,] mazeCellMap;
+    //Prefab instances 2D array
+    Maze2Cell[,] mazeCellMap;
 
 	//List for Prim's algorithm
 	List<Maze2Cell> unvisitCells = new List<Maze2Cell>();
@@ -36,7 +30,7 @@ public class Maze2Generator : MonoBehaviour
         {
             for (int y = 0; y < mazeY; y++)
             {
-                Maze2Cell cell = Instantiate(prefabDB.prefabList[1], mazeGroup).GetComponent<Maze2Cell>();
+                Maze2Cell cell = Instantiate(prefabDB.cellPrefab);
                 cell.transform.position = new Vector3(cell.mazeSize * x, 0, cell.mazeSize * y);
 
                 mazeCellMap[x, y] = cell;
@@ -46,11 +40,54 @@ public class Maze2Generator : MonoBehaviour
             }
         }
 
-        Maze2Cell startCell = mazeCellMap[1, 1];
+        Maze2Cell startCell = mazeCellMap[Random.Range(2,mazeX-2), Random.Range(2,mazeY-2)];
+        Player.instance.gameObject.SetActive(false);
+        Player.instance.transform.position = startCell.transform.position;
         unvisitCells.Add(startCell);
 
-		//Start Recursive at cell [1,1] ([0,0] is a wall)
 		RecursiveRandomPrim(startCell);
+
+        for (int i = 0; i<mazeCellMap.GetLength(1); i++)
+        {
+            mazeCellMap[0, i].gameObject.SetActive(false);
+            mazeCellMap[1, i].gameObject.SetActive(false);
+            mazeCellMap[mazeX-1, i].gameObject.SetActive(false);
+            mazeCellMap[mazeX-2, i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < mazeCellMap.GetLength(0); i++)
+        {
+            mazeCellMap[i, 0].gameObject.SetActive(false);
+            mazeCellMap[i, 1].gameObject.SetActive(false);
+            mazeCellMap[i, mazeY-1].gameObject.SetActive(false);
+            mazeCellMap[i, mazeY-2].gameObject.SetActive(false);
+        }
+
+        AddStuff(startCell);
+    }
+
+    void AddStuff(Maze2Cell startCell)
+    {
+        List<Maze2Cell> availableCells = new();
+        for (int i = 0; i < mazeCellMap.GetLength(1); i++)
+        {
+            for (int j = 0; j < mazeCellMap.GetLength(0); j++)
+            {
+                if (mazeCellMap[i, j].gameObject.activeSelf)
+                    availableCells.Add(mazeCellMap[i, j]);
+            }
+        }
+        availableCells.Remove(startCell);
+
+        for (int i = 0; i<mazeX/8; i++) //add jewels
+        {
+            Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+            Jewel newJewel = Instantiate(prefabDB.jewelPrefab);
+            newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.5f, randomCell.transform.position.z);
+            availableCells.Remove(randomCell);
+        }
+
+        startCell.gameObject.SetActive(true);
+        Player.instance.gameObject.SetActive(true);
     }
 
     void RecursiveRandomPrim(Maze2Cell startCell)
@@ -129,6 +166,7 @@ public class Maze2Generator : MonoBehaviour
             Debug.Log("Generation Done");
         }
     }
+
     List<Maze2Cell> CheckCellSurroundings(Maze2Cell cell)
     {
         List<Maze2Cell> neighborUnvisitedCells = new List<Maze2Cell>();

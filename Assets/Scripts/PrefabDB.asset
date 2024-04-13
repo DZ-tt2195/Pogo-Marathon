@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fcf17022c84cf41b8484d62a1caaed, type: 3}
   m_Name: PrefabDB
   m_EditorClassIdentifier: 
-  prefabList:
-  - {fileID: 8462680002263040478, guid: 343c9fa75e3f31546a73da0134cea05c, type: 3}
-  - {fileID: 8462680002263040478, guid: 6490caf145dbcc740be0577ce17a212c, type: 3}
+  cellPrefab: {fileID: 7651801884938246577, guid: 6490caf145dbcc740be0577ce17a212c, type: 3}
+  jewelPrefab: {fileID: 6833742944846599459, guid: 5f37a20332e0e433cbddb3f37f8f015f, type: 3}
