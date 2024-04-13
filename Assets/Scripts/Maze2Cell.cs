@@ -22,5 +22,6 @@ public class Maze2Cell : MonoBehaviour
     {
         locX = x;
         locY = y;
+        this.name = $"{x}, {y}";
     }
 }

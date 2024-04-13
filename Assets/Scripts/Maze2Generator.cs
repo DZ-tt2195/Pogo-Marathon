@@ -60,24 +60,24 @@ public class Maze2Generator : MonoBehaviour
         {
             startCell.isVisited = true;
             //This cell will not be a wall cell
-            startCell.wall.SetActive(false);
+            startCell.gameObject.SetActive(false);
 
             //Instant connect from main path, hide the wall cell in between
             if (startCell.tunnelDirection == Maze2TunnelDirectionIndicator.Right)
             {
-                mazeCellMap[startCell.locX - 1, startCell.locY].wall.SetActive(false);
+                mazeCellMap[startCell.locX - 1, startCell.locY].gameObject.SetActive(false);
             }
             else if (startCell.tunnelDirection == Maze2TunnelDirectionIndicator.Left)
             {
-                mazeCellMap[startCell.locX + 1, startCell.locY].wall.SetActive(false);
+                mazeCellMap[startCell.locX + 1, startCell.locY].gameObject.SetActive(false);
             }
             else if (startCell.tunnelDirection == Maze2TunnelDirectionIndicator.Up)
             {
-                mazeCellMap[startCell.locX, startCell.locY + 1].wall.SetActive(false);
+                mazeCellMap[startCell.locX, startCell.locY + 1].gameObject.SetActive(false);
             }
             else if (startCell.tunnelDirection == Maze2TunnelDirectionIndicator.Down)
             {
-                mazeCellMap[startCell.locX, startCell.locY - 1].wall.SetActive(false);
+                mazeCellMap[startCell.locX, startCell.locY - 1].gameObject.SetActive(false);
             }
 
             //Standard connection, check unvisited cells nearby start cell
@@ -89,23 +89,23 @@ public class Maze2Generator : MonoBehaviour
                 //Connect to one of the nearby unvisit cells
                 Maze2Cell endCell = neighborUnvisitedCells[Random.Range(0, neighborUnvisitedCells.Count)];
                 endCell.isVisited = true;
-                endCell.wall.SetActive(false);
+                endCell.gameObject.SetActive(false);
 
                 if (endCell.locX < startCell.locX)
                 {
-                    mazeCellMap[startCell.locX - 1, startCell.locY].wall.SetActive(false);
+                    mazeCellMap[startCell.locX - 1, startCell.locY].gameObject.SetActive(false);
                 }
                 else if (endCell.locX > startCell.locX)
                 {
-                    mazeCellMap[startCell.locX + 1, startCell.locY].wall.SetActive(false);
+                    mazeCellMap[startCell.locX + 1, startCell.locY].gameObject.SetActive(false);
                 }
                 else if (endCell.locY < startCell.locY)
                 {
-                    mazeCellMap[startCell.locX, startCell.locY - 1].wall.SetActive(false);
+                    mazeCellMap[startCell.locX, startCell.locY - 1].gameObject.SetActive(false);
                 }
                 else if (endCell.locY > startCell.locY)
                 {
-                    mazeCellMap[startCell.locX, startCell.locY + 1].wall.SetActive(false);
+                    mazeCellMap[startCell.locX, startCell.locY + 1].gameObject.SetActive(false);
                 }
 
                 //Remove visited endCell from unvisited cell list
