@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -37,7 +38,7 @@ public class Player : MonoBehaviour
         personalCamera.transform.position = new Vector3(this.transform.position.x, 30, this.transform.position.z - 12.5f);
 
         if (this.transform.position.y < -10f)
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            Death();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -53,8 +54,17 @@ public class Player : MonoBehaviour
         }
         else if (other.CompareTag("Jewel"))
         {
+            Maze2Generator.instance.UpdateJewelText();
             Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("Death"))
+        {
+            Death();
         }
     }
 
+    void Death()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 }

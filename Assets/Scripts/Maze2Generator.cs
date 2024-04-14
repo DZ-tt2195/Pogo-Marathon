@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Maze2Generator : MonoBehaviour
 {
+    public static Maze2Generator instance;
 	//Prefab database
 	[SerializeField] PrefabDatabase prefabDB;
 	//Map size
 	[SerializeField] int mazeX;
     [SerializeField] int mazeY;
+
+    //Map camera
+    [SerializeField] Camera mapCam;
 
     //Prefab instances 2D array
     Maze2Cell[,] mazeCellMap;
@@ -16,16 +21,31 @@ public class Maze2Generator : MonoBehaviour
 	//List for Prim's algorithm
 	List<Maze2Cell> unvisitCells = new List<Maze2Cell>();
 
+    [SerializeField] TMP_Text jewelText;
+    int jewelsCollected = 0;
+    int totalJewels;
+
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
         GenerateMaze();
+    }
+
+    public void UpdateJewelText()
+    {
+        jewelsCollected++;
+        jewelText.text = $"Jewels: {jewelsCollected} / {totalJewels}";
     }
 
     void GenerateMaze()
     {
         mazeCellMap = new Maze2Cell[mazeX, mazeY];
-        //Build all cells
+        mapCam.transform.position = new Vector3
+            (prefabDB.cellPrefab.mazeSize * (mazeX - 1) / 2,
+            Mathf.Max(mazeX-1.5f, mazeY-1.5f) * (prefabDB.cellPrefab.mazeSize-1),
+            prefabDB.cellPrefab.mazeSize * (mazeY - 1) / 2);
+
         for (int x = 0; x < mazeX; x++)
         {
             for (int y = 0; y < mazeY; y++)
@@ -68,9 +88,9 @@ public class Maze2Generator : MonoBehaviour
     void AddStuff(Maze2Cell startCell)
     {
         List<Maze2Cell> availableCells = new();
-        for (int i = 0; i < mazeCellMap.GetLength(1); i++)
+        for (int i = 0; i < mazeCellMap.GetLength(0); i++)
         {
-            for (int j = 0; j < mazeCellMap.GetLength(0); j++)
+            for (int j = 0; j < mazeCellMap.GetLength(1); j++)
             {
                 if (mazeCellMap[i, j].gameObject.activeSelf)
                     availableCells.Add(mazeCellMap[i, j]);
@@ -78,11 +98,24 @@ public class Maze2Generator : MonoBehaviour
         }
         availableCells.Remove(startCell);
 
-        for (int i = 0; i<mazeX/8; i++) //add jewels
+        totalJewels = Mathf.Max(mazeX, mazeY);
+        jewelText.text = $"Jewels: {0} / {totalJewels}";
+        for (int i = 0; i<totalJewels; i++) //add jewels
         {
             Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
             Jewel newJewel = Instantiate(prefabDB.jewelPrefab);
-            newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.5f, randomCell.transform.position.z);
+            newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+
+            for (int j = 0; j < 2; j++)
+            {
+                int randomWall = Random.Range(-1, randomCell.listOfWalls.Count);
+                if (randomWall > -1)
+                {
+                    randomCell.listOfWalls[randomWall].SetActive(true);
+                    randomCell.listOfWalls.RemoveAt(randomWall);
+                }
+            }
+
             availableCells.Remove(randomCell);
         }
 

@@ -16,12 +16,15 @@ public class Maze2Cell : MonoBehaviour
     public int locY;
 
     public bool shrinking = false;
+    public List<GameObject> listOfWalls = new();
 
     public void Init(int x, int y)
     {
         locX = x;
         locY = y;
         this.name = $"{x}, {y}";
+        foreach (GameObject wall in listOfWalls)
+            wall.SetActive(false);
     }
 
     public IEnumerator ShrinkAway()
