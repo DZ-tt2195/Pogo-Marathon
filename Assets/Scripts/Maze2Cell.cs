@@ -29,6 +29,9 @@ public class Maze2Cell : MonoBehaviour
 
     public IEnumerator ShrinkAway()
     {
+        foreach (Transform child in this.transform)
+            child.gameObject.SetActive(false);
+
         float elapsedTime = 0f;
         float waitTime = 2f;
         Vector3 maxSize = transform.localScale;

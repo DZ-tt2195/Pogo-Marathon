@@ -4,13 +4,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+[RequireComponent(typeof(CharacterController))]
 public class Player : MonoBehaviour
 {
     private CharacterController charController;
     public static Player instance;
-    [SerializeField] float speed;
+    public List<Vector3> listOfLocations = new();
 
     [SerializeField] Transform personalCamera;
+    [SerializeField] float speed;
     [SerializeField] float gravityValue;
     [SerializeField] float jumpHeight;
 
@@ -26,13 +28,19 @@ public class Player : MonoBehaviour
     void Update()
     {
         Vector3 move = transform.rotation * new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        listOfLocations.Add(this.transform.position);
 
-        if (/*Input.GetKeyDown(KeyCode.Space) && */ charController.isGrounded)
+        if (charController.isGrounded)
+        {
             currentYVelocity = Mathf.Sqrt(jumpHeight * gravityValue);
-        else if (charController.isGrounded)
-            currentYVelocity = -0.5f;
+            //listOfLocations.Add(this.transform.position);
+        }
 
         move.y = currentYVelocity;
+        /*
+        if (currentYVelocity > 0 && (currentYVelocity + (gravityValue*Time.deltaTime) < 0))
+            listOfLocations.Add(this.transform.position);
+        */
         currentYVelocity += gravityValue * Time.deltaTime;
         charController.Move(speed * Time.deltaTime * move);
         personalCamera.transform.position = new Vector3(this.transform.position.x, 30, this.transform.position.z - 12.5f);
@@ -54,7 +62,7 @@ public class Player : MonoBehaviour
         }
         else if (other.CompareTag("Jewel"))
         {
-            Maze2Generator.instance.UpdateJewelText();
+            Maze2Generator.instance.CollectJewel(other.GetComponent<Jewel>());
             Destroy(other.gameObject);
         }
         else if (other.CompareTag("Death"))

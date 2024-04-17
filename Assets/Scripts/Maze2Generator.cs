@@ -22,20 +22,21 @@ public class Maze2Generator : MonoBehaviour
 	List<Maze2Cell> unvisitCells = new List<Maze2Cell>();
 
     [SerializeField] TMP_Text jewelText;
-    int jewelsCollected = 0;
-    int totalJewels;
+    int totalJewels = 0;
+    List<Jewel> listOfJewels = new();
 
     // Start is called before the first frame update
     void Start()
     {
         instance = this;
+        Application.targetFrameRate = 60;
         GenerateMaze();
     }
 
-    public void UpdateJewelText()
+    public void CollectJewel(Jewel collectedJewel)
     {
-        jewelsCollected++;
-        jewelText.text = $"Jewels: {jewelsCollected} / {totalJewels}";
+        listOfJewels.Remove(collectedJewel);
+        jewelText.text = $"Jewels: {totalJewels-listOfJewels.Count} / {totalJewels}";
     }
 
     void GenerateMaze()
@@ -54,7 +55,6 @@ public class Maze2Generator : MonoBehaviour
                 cell.transform.position = new Vector3(cell.mazeSize * x, 0, cell.mazeSize * y);
 
                 mazeCellMap[x, y] = cell;
-
                 //Assign the current position to cell
                 cell.Init(x, y);
             }
@@ -98,13 +98,16 @@ public class Maze2Generator : MonoBehaviour
         }
         availableCells.Remove(startCell);
 
-        totalJewels = Mathf.Max(mazeX, mazeY);
+        totalJewels = Mathf.Max(mazeX, mazeY)*2;
         jewelText.text = $"Jewels: {0} / {totalJewels}";
+
         for (int i = 0; i<totalJewels; i++) //add jewels
         {
             Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
             Jewel newJewel = Instantiate(prefabDB.jewelPrefab);
             newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+            newJewel.name = $"Jewel {i}";
+            listOfJewels.Add(newJewel);
 
             for (int j = 0; j < 2; j++)
             {
@@ -193,10 +196,6 @@ public class Maze2Generator : MonoBehaviour
             //As long as there is unvisited cell in the list, keep the recursive progress
             //Randomly choose one cell and continue
             RecursiveRandomPrim(unvisitCells[Random.Range(0, unvisitCells.Count)]);
-        }
-        else
-        {
-            Debug.Log("Generation Done");
         }
     }
 
