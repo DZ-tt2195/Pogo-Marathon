@@ -122,6 +122,15 @@ public class Maze2Generator : MonoBehaviour
             availableCells.Remove(randomCell);
         }
 
+        for (int i = 0; i<5; i++)
+        {
+            Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+            Spinner newSpinner = Instantiate(prefabDB.spinnerPrefab);
+            newSpinner.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+            newSpinner.name = $"Spinner {i}";
+            availableCells.Remove(randomCell);
+        }
+
         startCell.gameObject.SetActive(true);
         Player.instance.gameObject.SetActive(true);
     }
