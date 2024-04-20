@@ -10,7 +10,7 @@ public class Spinner : MonoBehaviour
 
     private void Start()
     {
-        rotationSpeed = Random.Range(0.5f, 2.5f) * (Random.Range(0, 2) == 0 ? 1 : -1);
+        rotationSpeed = Random.Range(0.4f, 1f) * (Random.Range(0, 2) == 0 ? 1 : -1);
         toRotate.SetActive(false);
         StartCoroutine(Delay());
     }

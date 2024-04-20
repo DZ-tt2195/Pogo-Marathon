@@ -342,8 +342,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabDB: {fileID: 11400000, guid: 2e2c73300958de844998e8741a3a89db, type: 2}
-  mazeX: 20
-  mazeY: 20
+  mazeX: 15
+  mazeY: 15
   mapCam: {fileID: 1886396435}
   jewelText: {fileID: 1772172050}
 --- !u!1 &458253236

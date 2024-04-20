@@ -33,7 +33,7 @@ public class Maze2Cell : MonoBehaviour
             child.gameObject.SetActive(false);
 
         float elapsedTime = 0f;
-        float waitTime = 2f;
+        float waitTime = 2.5f;
         Vector3 maxSize = transform.localScale;
 
         while (elapsedTime < waitTime) //shrink until it reaches 0

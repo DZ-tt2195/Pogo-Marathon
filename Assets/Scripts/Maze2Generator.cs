@@ -2,34 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Maze2Generator : MonoBehaviour
 {
     public static Maze2Generator instance;
-	//Prefab database
-	[SerializeField] PrefabDatabase prefabDB;
-	//Map size
-	[SerializeField] int mazeX;
-    [SerializeField] int mazeY;
 
-    //Map camera
-    [SerializeField] Camera mapCam;
+    int mapX;
+    int mapY;
 
-    //Prefab instances 2D array
-    Maze2Cell[,] mazeCellMap;
+    [SerializeField] Camera mapCam; //Map camera
 
-	//List for Prim's algorithm
-	List<Maze2Cell> unvisitCells = new List<Maze2Cell>();
+    Maze2Cell[,] mazeCellMap; //Prefab instances 2D array
+
+    List<Maze2Cell> unvisitCells = new List<Maze2Cell>(); //List for Prim's algorithm
 
     [SerializeField] TMP_Text jewelText;
     int totalJewels = 0;
     List<Jewel> listOfJewels = new();
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        if (CarryVariables.instance == null)
+            SceneManager.LoadScene(0);
+    }
+
     void Start()
     {
         instance = this;
-        Application.targetFrameRate = 60;
+        mapX = CarryVariables.instance.settingsToUse.levelSizeX;
+        mapY = CarryVariables.instance.settingsToUse.levelSizeY;
         GenerateMaze();
     }
 
@@ -41,17 +43,17 @@ public class Maze2Generator : MonoBehaviour
 
     void GenerateMaze()
     {
-        mazeCellMap = new Maze2Cell[mazeX, mazeY];
+        mazeCellMap = new Maze2Cell[mapX, mapY];
         mapCam.transform.position = new Vector3
-            (prefabDB.cellPrefab.mazeSize * (mazeX - 1) / 2,
-            Mathf.Max(mazeX-1.5f, mazeY-1.5f) * (prefabDB.cellPrefab.mazeSize-1),
-            prefabDB.cellPrefab.mazeSize * (mazeY - 1) / 2);
+            (CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapX - 1) / 2,
+            Mathf.Max(mapX - 1.5f, mapY - 1.5f) * (CarryVariables.instance.prefabDB.cellPrefab.mazeSize-1),
+            CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapY - 1) / 2);
 
-        for (int x = 0; x < mazeX; x++)
+        for (int x = 0; x < mapX; x++)
         {
-            for (int y = 0; y < mazeY; y++)
+            for (int y = 0; y < mapY; y++)
             {
-                Maze2Cell cell = Instantiate(prefabDB.cellPrefab);
+                Maze2Cell cell = Instantiate(CarryVariables.instance.prefabDB.cellPrefab);
                 cell.transform.position = new Vector3(cell.mazeSize * x, 0, cell.mazeSize * y);
 
                 mazeCellMap[x, y] = cell;
@@ -60,7 +62,7 @@ public class Maze2Generator : MonoBehaviour
             }
         }
 
-        Maze2Cell startCell = mazeCellMap[Random.Range(2,mazeX-2), Random.Range(2,mazeY-2)];
+        Maze2Cell startCell = mazeCellMap[Random.Range(2, mapX - 2), Random.Range(2, mapY - 2)];
         Player.instance.gameObject.SetActive(false);
         Player.instance.transform.position = startCell.transform.position;
         unvisitCells.Add(startCell);
@@ -71,15 +73,15 @@ public class Maze2Generator : MonoBehaviour
         {
             mazeCellMap[0, i].gameObject.SetActive(false);
             mazeCellMap[1, i].gameObject.SetActive(false);
-            mazeCellMap[mazeX-1, i].gameObject.SetActive(false);
-            mazeCellMap[mazeX-2, i].gameObject.SetActive(false);
+            mazeCellMap[mapX - 1, i].gameObject.SetActive(false);
+            mazeCellMap[mapX - 2, i].gameObject.SetActive(false);
         }
         for (int i = 0; i < mazeCellMap.GetLength(0); i++)
         {
             mazeCellMap[i, 0].gameObject.SetActive(false);
             mazeCellMap[i, 1].gameObject.SetActive(false);
-            mazeCellMap[i, mazeY-1].gameObject.SetActive(false);
-            mazeCellMap[i, mazeY-2].gameObject.SetActive(false);
+            mazeCellMap[i, mapY - 1].gameObject.SetActive(false);
+            mazeCellMap[i, mapY - 2].gameObject.SetActive(false);
         }
 
         AddStuff(startCell);
@@ -98,13 +100,13 @@ public class Maze2Generator : MonoBehaviour
         }
         availableCells.Remove(startCell);
 
-        totalJewels = Mathf.Max(mazeX, mazeY)*2;
+        totalJewels = CarryVariables.instance.settingsToUse.numJewels;
         jewelText.text = $"Jewels: {0} / {totalJewels}";
 
         for (int i = 0; i<totalJewels; i++) //add jewels
         {
             Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
-            Jewel newJewel = Instantiate(prefabDB.jewelPrefab);
+            Jewel newJewel = Instantiate(CarryVariables.instance.prefabDB.jewelPrefab);
             newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
             newJewel.name = $"Jewel {i}";
             listOfJewels.Add(newJewel);
@@ -122,10 +124,10 @@ public class Maze2Generator : MonoBehaviour
             availableCells.Remove(randomCell);
         }
 
-        for (int i = 0; i<5; i++)
+        for (int i = 0; i< CarryVariables.instance.settingsToUse.numSpinners; i++)
         {
             Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
-            Spinner newSpinner = Instantiate(prefabDB.spinnerPrefab);
+            Spinner newSpinner = Instantiate(CarryVariables.instance.prefabDB.spinnerPrefab);
             newSpinner.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
             newSpinner.name = $"Spinner {i}";
             availableCells.Remove(randomCell);
@@ -222,7 +224,7 @@ public class Maze2Generator : MonoBehaviour
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Left;
             }
         }
-        if (cell.locX + 2 < mazeX - 1)
+        if (cell.locX + 2 < mapX - 1)
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX + 2, cell.locY];
             if (!checkingNeighborCell.isVisited)
@@ -240,7 +242,7 @@ public class Maze2Generator : MonoBehaviour
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Up;
             }
         }
-        if (cell.locY + 2 < mazeY - 1)
+        if (cell.locY + 2 < mapY - 1)
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX, cell.locY + 2];
             if (!checkingNeighborCell.isVisited)
