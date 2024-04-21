@@ -16,15 +16,23 @@ public class Maze2Cell : MonoBehaviour
     public int locY;
 
     public bool shrinking = false;
-    public List<GameObject> listOfWalls = new();
+    [SerializeField] List<GameObject> listOfWalls = new();
 
     public void Init(int x, int y)
     {
         locX = x;
         locY = y;
         this.name = $"{x}, {y}";
+
         foreach (GameObject wall in listOfWalls)
             wall.SetActive(false);
+
+        for (int k = 0; k < 1; k++)
+        {
+            int randomWall = Random.Range(0, this.listOfWalls.Count);
+            this.listOfWalls[randomWall].SetActive(true);
+            this.listOfWalls.RemoveAt(randomWall);
+        }
     }
 
     public IEnumerator ShrinkAway()

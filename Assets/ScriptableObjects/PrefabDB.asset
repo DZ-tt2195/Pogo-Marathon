@@ -15,3 +15,4 @@ MonoBehaviour:
   cellPrefab: {fileID: 7651801884938246577, guid: 6490caf145dbcc740be0577ce17a212c, type: 3}
   jewelPrefab: {fileID: 6833742944846599459, guid: 5f37a20332e0e433cbddb3f37f8f015f, type: 3}
   spinnerPrefab: {fileID: 1806583961159267302, guid: 0e0ca3c52b5a34d6f8744c20841b683f, type: 3}
+  flyingCubePrefab: {fileID: 7221756287689607671, guid: 984cb80cf36d84ddfb0178aaceaff567, type: 3}

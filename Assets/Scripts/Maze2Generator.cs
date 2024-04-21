@@ -95,42 +95,63 @@ public class Maze2Generator : MonoBehaviour
             for (int j = 0; j < mazeCellMap.GetLength(1); j++)
             {
                 if (mazeCellMap[i, j].gameObject.activeSelf)
+                {
                     availableCells.Add(mazeCellMap[i, j]);
+                }
             }
         }
         availableCells.Remove(startCell);
 
-        totalJewels = CarryVariables.instance.settingsToUse.numJewels;
+        totalJewels = Mathf.Min(CarryVariables.instance.settingsToUse.numJewels, availableCells.Count);
         jewelText.text = $"Jewels: {0} / {totalJewels}";
 
         for (int i = 0; i<totalJewels; i++) //add jewels
         {
-            Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
-            Jewel newJewel = Instantiate(CarryVariables.instance.prefabDB.jewelPrefab);
-            newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
-            newJewel.name = $"Jewel {i}";
-            listOfJewels.Add(newJewel);
-
-            for (int j = 0; j < 2; j++)
+            try
             {
-                int randomWall = Random.Range(-1, randomCell.listOfWalls.Count);
-                if (randomWall > -1)
-                {
-                    randomCell.listOfWalls[randomWall].SetActive(true);
-                    randomCell.listOfWalls.RemoveAt(randomWall);
-                }
+                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                Jewel newJewel = Instantiate(CarryVariables.instance.prefabDB.jewelPrefab);
+                newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+                newJewel.name = $"Jewel {i}";
+                listOfJewels.Add(newJewel);
+                availableCells.Remove(randomCell);
             }
+            catch
+            {
+                break;
+            }
+        }
 
-            availableCells.Remove(randomCell);
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.numFlying; i++)
+        {
+            try
+            {
+                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                GameObject newFlying = Instantiate(CarryVariables.instance.prefabDB.flyingCubePrefab);
+                newFlying.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+                newFlying.name = $"Flying Cube {i}";
+                availableCells.Remove(randomCell);
+            }
+            catch
+            {
+                break;
+            }
         }
 
         for (int i = 0; i< CarryVariables.instance.settingsToUse.numSpinners; i++)
         {
-            Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
-            Spinner newSpinner = Instantiate(CarryVariables.instance.prefabDB.spinnerPrefab);
-            newSpinner.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
-            newSpinner.name = $"Spinner {i}";
-            availableCells.Remove(randomCell);
+            try
+            {
+                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                Spinner newSpinner = Instantiate(CarryVariables.instance.prefabDB.spinnerPrefab);
+                newSpinner.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
+                newSpinner.name = $"Spinner {i}";
+                availableCells.Remove(randomCell);
+            }
+            catch
+            {
+                break;
+            }
         }
 
         startCell.gameObject.SetActive(true);

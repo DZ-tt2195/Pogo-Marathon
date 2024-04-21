@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelSizeX: 15
   levelSizeY: 15
-  numJewels: 15
+  numJewels: 20
   numSpinners: 0
   blanked: 0

@@ -6,4 +6,5 @@ public class PrefabDatabase : ScriptableObject
     public Maze2Cell cellPrefab;
     public Jewel jewelPrefab;
     public Spinner spinnerPrefab;
+    public GameObject flyingCubePrefab;
 }

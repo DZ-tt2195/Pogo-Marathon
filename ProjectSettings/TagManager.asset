@@ -9,6 +9,7 @@ TagManager:
   - Jewel
   - Color Capsule
   - Death
+  - Flying
   layers:
   - Default
   - TransparentFX
