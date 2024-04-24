@@ -16,11 +16,8 @@ public class Spinner : MonoBehaviour
     }
 
     private void Update()
-    {
-        toRotate.transform.localEulerAngles = new Vector3(
-            toRotate.transform.localEulerAngles.x,
-            toRotate.transform.localEulerAngles.y + rotationSpeed,
-            toRotate.transform.localEulerAngles.z);
+    { 
+        toRotate.transform.Rotate(0f, rotationSpeed, 0f);
     }
 
     IEnumerator Delay()

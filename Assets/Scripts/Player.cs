@@ -9,7 +9,6 @@ public class Player : MonoBehaviour
 {
     private CharacterController charController;
     public static Player instance;
-    public List<Vector3> listOfLocations = new();
 
     [SerializeField] Transform personalCamera;
     [SerializeField] float speed;
@@ -17,9 +16,9 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpHeight;
 
     [SerializeField] GameObject flyingSphere;
-    enum GameState { Playing, Flying, End };
+    public enum GameState { Playing, Flying, End };
     GameState _currentState;
-    GameState currentState
+    public GameState currentState
     {
         get { return _currentState; }
         set { _currentState = value; flyingSphere.SetActive(value == GameState.Flying); }
@@ -38,25 +37,21 @@ public class Player : MonoBehaviour
     void Update()
     {
         Vector3 move = transform.rotation * new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        listOfLocations.Add(this.transform.position);
 
         if (currentState == GameState.Playing)
         {
             if (charController.isGrounded)
-            {
                 currentYVelocity = Mathf.Sqrt(jumpHeight * gravityValue);
-                //listOfLocations.Add(this.transform.position);
-            }
 
             move.y = currentYVelocity;
-            /*
-            if (currentYVelocity > 0 && (currentYVelocity + (gravityValue*Time.deltaTime) < 0))
-                listOfLocations.Add(this.transform.position);
-            */
             currentYVelocity += gravityValue * Time.deltaTime;
 
             if (this.transform.position.y < -10f)
-                Death();
+                Maze2Generator.instance.EndGame(false);
+        }
+        else if (currentState == GameState.Flying)
+        {
+            move.y = 0;
         }
 
         if (currentState != GameState.End)
@@ -82,26 +77,22 @@ public class Player : MonoBehaviour
                 if (!cell.shrinking)
                 {
                     cell.shrinking = true;
+                    Maze2Generator.instance.destroyedTiles++;
                     StartCoroutine(cell.ShrinkAway());
                 }
             }
             else if (other.CompareTag("Death"))
             {
-                Death();
+                Maze2Generator.instance.EndGame(false);
             }
             else if (other.CompareTag("Flying"))
             {
                 Destroy(other.gameObject);
                 speed *= 1.5f;
                 currentState = GameState.Flying;
-                Invoke(nameof(StopFlying), 3f);
+                Invoke(nameof(StopFlying), 2f);
             }
         }
-    }
-
-    void Death()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     void StopFlying()

@@ -1,11 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Diagnostics;
 
 public class Maze2Generator : MonoBehaviour
 {
+
+#region Variables
+
     public static Maze2Generator instance;
 
     int mapX;
@@ -14,39 +20,51 @@ public class Maze2Generator : MonoBehaviour
     [SerializeField] Camera mapCam; //Map camera
 
     Maze2Cell[,] mazeCellMap; //Prefab instances 2D array
-
     List<Maze2Cell> unvisitCells = new List<Maze2Cell>(); //List for Prim's algorithm
 
     [SerializeField] TMP_Text jewelText;
     int totalJewels = 0;
     List<Jewel> listOfJewels = new();
 
+    [SerializeField] GameObject gameOverObject;
+    TMP_Text endText;
+    TMP_Text statsText;
+
+    public int destroyedTiles = 0;
+    Stopwatch stopwatch;
+
+    #endregion
+
+#region Setup
+
     private void Awake()
     {
         if (CarryVariables.instance == null)
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene("Title");
+
+        instance = this;
+        endText = gameOverObject.transform.Find("End Text").GetComponent<TMP_Text>();
+        statsText = gameOverObject.transform.Find("Stats Text").GetComponent<TMP_Text>();
+        gameOverObject.SetActive(false);
     }
 
     void Start()
     {
-        instance = this;
+        stopwatch = new Stopwatch();
+        stopwatch.Start();
+
         mapX = CarryVariables.instance.settingsToUse.levelSizeX;
         mapY = CarryVariables.instance.settingsToUse.levelSizeY;
         GenerateMaze();
     }
 
-    public void CollectJewel(Jewel collectedJewel)
-    {
-        listOfJewels.Remove(collectedJewel);
-        jewelText.text = $"Jewels: {totalJewels-listOfJewels.Count} / {totalJewels}";
-    }
 
     void GenerateMaze()
     {
         mazeCellMap = new Maze2Cell[mapX, mapY];
         mapCam.transform.position = new Vector3
             (CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapX - 1) / 2,
-            Mathf.Max(mapX - 1.5f, mapY - 1.5f) * (CarryVariables.instance.prefabDB.cellPrefab.mazeSize-1),
+            Mathf.Max(mapX - 1.5f, mapY - 1.5f) * (CarryVariables.instance.prefabDB.cellPrefab.mazeSize - 1),
             CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapY - 1) / 2);
 
         for (int x = 0; x < mapX; x++)
@@ -62,14 +80,14 @@ public class Maze2Generator : MonoBehaviour
             }
         }
 
-        Maze2Cell startCell = mazeCellMap[Random.Range(2, mapX - 2), Random.Range(2, mapY - 2)];
+        Maze2Cell startCell = mazeCellMap[UnityEngine.Random.Range(2, mapX - 2), UnityEngine.Random.Range(2, mapY - 2)];
         Player.instance.gameObject.SetActive(false);
         Player.instance.transform.position = startCell.transform.position;
         unvisitCells.Add(startCell);
 
-		RecursiveRandomPrim(startCell);
+        RecursiveRandomPrim(startCell);
 
-        for (int i = 0; i<mazeCellMap.GetLength(1); i++)
+        for (int i = 0; i < mazeCellMap.GetLength(1); i++)
         {
             mazeCellMap[0, i].gameObject.SetActive(false);
             mazeCellMap[1, i].gameObject.SetActive(false);
@@ -105,11 +123,11 @@ public class Maze2Generator : MonoBehaviour
         totalJewels = Mathf.Min(CarryVariables.instance.settingsToUse.numJewels, availableCells.Count);
         jewelText.text = $"Jewels: {0} / {totalJewels}";
 
-        for (int i = 0; i<totalJewels; i++) //add jewels
+        for (int i = 0; i < totalJewels; i++) //add jewels
         {
             try
             {
-                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
                 Jewel newJewel = Instantiate(CarryVariables.instance.prefabDB.jewelPrefab);
                 newJewel.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
                 newJewel.name = $"Jewel {i}";
@@ -126,7 +144,7 @@ public class Maze2Generator : MonoBehaviour
         {
             try
             {
-                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
                 GameObject newFlying = Instantiate(CarryVariables.instance.prefabDB.flyingCubePrefab);
                 newFlying.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
                 newFlying.name = $"Flying Cube {i}";
@@ -138,11 +156,11 @@ public class Maze2Generator : MonoBehaviour
             }
         }
 
-        for (int i = 0; i< CarryVariables.instance.settingsToUse.numSpinners; i++)
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.numSpinners; i++)
         {
             try
             {
-                Maze2Cell randomCell = availableCells[Random.Range(0, availableCells.Count)];
+                Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
                 Spinner newSpinner = Instantiate(CarryVariables.instance.prefabDB.spinnerPrefab);
                 newSpinner.transform.position = new Vector3(randomCell.transform.position.x, 1.75f, randomCell.transform.position.z);
                 newSpinner.name = $"Spinner {i}";
@@ -152,6 +170,13 @@ public class Maze2Generator : MonoBehaviour
             {
                 break;
             }
+        }
+
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.blanked; i++)
+        {
+            Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
+            availableCells.Remove(randomCell);
+            randomCell.gameObject.SetActive(false);
         }
 
         startCell.gameObject.SetActive(true);
@@ -192,7 +217,7 @@ public class Maze2Generator : MonoBehaviour
             if (neighborUnvisitedCells.Count > 0)
             {
                 //Connect to one of the nearby unvisit cells
-                Maze2Cell endCell = neighborUnvisitedCells[Random.Range(0, neighborUnvisitedCells.Count)];
+                Maze2Cell endCell = neighborUnvisitedCells[UnityEngine.Random.Range(0, neighborUnvisitedCells.Count)];
                 endCell.isVisited = true;
                 endCell.gameObject.SetActive(false);
 
@@ -216,8 +241,8 @@ public class Maze2Generator : MonoBehaviour
                 //Remove visited endCell from unvisited cell list
                 neighborUnvisitedCells.Remove(endCell);
 
-				//Get all unvisited cells around startCell & endCell and add to the unvisitCells list
-				unvisitCells.AddRange(neighborUnvisitedCells);
+                //Get all unvisited cells around startCell & endCell and add to the unvisitCells list
+                unvisitCells.AddRange(neighborUnvisitedCells);
                 //Since end cell is also changed to visited status, add unvisited cells nearby end cell as well
                 unvisitCells.AddRange(CheckCellSurroundings(endCell));
 
@@ -227,7 +252,7 @@ public class Maze2Generator : MonoBehaviour
         {
             //As long as there is unvisited cell in the list, keep the recursive progress
             //Randomly choose one cell and continue
-            RecursiveRandomPrim(unvisitCells[Random.Range(0, unvisitCells.Count)]);
+            RecursiveRandomPrim(unvisitCells[UnityEngine.Random.Range(0, unvisitCells.Count)]);
         }
     }
 
@@ -275,4 +300,32 @@ public class Maze2Generator : MonoBehaviour
 
         return neighborUnvisitedCells;
     }
+
+    #endregion
+
+#region Gameplay
+
+    public void CollectJewel(Jewel collectedJewel)
+    {
+        listOfJewels.Remove(collectedJewel);
+        jewelText.text = $"Jewels: {totalJewels-listOfJewels.Count} / {totalJewels}";
+
+        if (listOfJewels.Count == 0)
+            EndGame(true);
+    }
+
+    public void EndGame(bool won)
+    {
+        gameOverObject.SetActive(true);
+        Player.instance.currentState = Player.GameState.End;
+        endText.text = (won) ? "You Won!" : "You Died";
+
+        stopwatch.Stop();
+        TimeSpan x = stopwatch.Elapsed;
+        string part1 = $"Time Taken: {x.Minutes}:{(x.Seconds < 10 ? $"0{x.Seconds}" : $"{x.Seconds}")}.{x.Milliseconds}";
+        statsText.text = $"{part1}\nTiles Destroyed: {destroyedTiles}";
+    }
+
+    #endregion
+
 }
