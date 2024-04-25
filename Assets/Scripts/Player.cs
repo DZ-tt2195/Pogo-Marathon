@@ -97,7 +97,10 @@ public class Player : MonoBehaviour
 
     void StopFlying()
     {
-        speed /= 1.5f;
-        currentState = GameState.Playing;
+        if (currentState == GameState.Flying)
+        {
+            speed /= 1.5f;
+            currentState = GameState.Playing;
+        }
     }
 }

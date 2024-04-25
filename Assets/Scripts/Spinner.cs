@@ -12,7 +12,7 @@ public class Spinner : MonoBehaviour
     {
         rotationSpeed = Random.Range(0.4f, 1f) * (Random.Range(0, 2) == 0 ? 1 : -1);
         toRotate.SetActive(false);
-        StartCoroutine(Delay());
+        Invoke(nameof(EnableBlades), startingDelay);
     }
 
     private void Update()
@@ -20,9 +20,9 @@ public class Spinner : MonoBehaviour
         toRotate.transform.Rotate(0f, rotationSpeed, 0f);
     }
 
-    IEnumerator Delay()
+    void EnableBlades()
     {
-        yield return new WaitForSeconds(startingDelay);
         toRotate.SetActive(true);
     }
+
 }

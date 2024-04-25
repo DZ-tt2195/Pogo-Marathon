@@ -10,10 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 757caab5e0a304f50beccb99d1714720, type: 3}
-  m_Name: DefaultSettings
+  m_Name: Level4
   m_EditorClassIdentifier: 
-  levelSizeX: 15
-  levelSizeY: 15
-  numJewels: 20
-  numSpinners: 0
-  blanked: 0
+  levelSizeX: 30
+  levelSizeY: 30
+  numJewels: 30
+  numFlying: 10
+  numSpinners: 15
+  blanked: 75
+  tutorial: This is the last main level, but you can customize the settings however
+    you lile.

@@ -9,4 +9,6 @@ public class LevelSettings : ScriptableObject
     public int numFlying;
     public int numSpinners;
     public int blanked;
+    [TextArea]
+    public string tutorial;
 }

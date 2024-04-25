@@ -58,7 +58,6 @@ public class Maze2Generator : MonoBehaviour
         GenerateMaze();
     }
 
-
     void GenerateMaze()
     {
         mazeCellMap = new Maze2Cell[mapX, mapY];
