@@ -7,10 +7,8 @@ public class Maze2Cell : MonoBehaviour
 {
     public Maze2TunnelDirectionIndicator tunnelDirection = Maze2TunnelDirectionIndicator.None;
 
-    [HideInInspector]
     public bool isVisited = false;
-
-    public float mazeSize = 5;
+    public float mazeSize;
 
     public int locX;
     public int locY;
@@ -18,16 +16,21 @@ public class Maze2Cell : MonoBehaviour
     public bool shrinking = false;
     [SerializeField] List<GameObject> listOfWalls = new();
 
+    /// <summary>
+    /// initial setup
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     public void Init(int x, int y)
     {
         locX = x;
         locY = y;
         this.name = $"{x}, {y}";
 
-        foreach (GameObject wall in listOfWalls)
+        foreach (GameObject wall in listOfWalls) //disable all walls
             wall.SetActive(false);
 
-        for (int k = 0; k < 1; k++)
+        for (int k = 0; k < 1; k++) //pick one wall to enable
         {
             int randomWall = Random.Range(0, this.listOfWalls.Count);
             this.listOfWalls[randomWall].SetActive(true);
@@ -35,6 +38,10 @@ public class Maze2Cell : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// disable all walls and then shrink away into nothing
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator ShrinkAway()
     {
         foreach (Transform child in this.transform)

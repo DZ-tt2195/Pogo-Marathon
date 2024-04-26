@@ -22,11 +22,11 @@ public class Maze2Generator : MonoBehaviour
     Maze2Cell[,] mazeCellMap; //Prefab instances 2D array
     List<Maze2Cell> unvisitCells = new List<Maze2Cell>(); //List for Prim's algorithm
 
-    [SerializeField] TMP_Text jewelText;
+    [SerializeField] TMP_Text jewelText; //text displaying number of jewels
     int totalJewels = 0;
-    List<Jewel> listOfJewels = new();
+    List<Jewel> listOfJewels = new(); //store all jewels
 
-    [SerializeField] GameObject gameOverObject;
+    [SerializeField] GameObject gameOverObject; //game over screen
     TMP_Text endText;
     TMP_Text statsText;
 
@@ -39,7 +39,7 @@ public class Maze2Generator : MonoBehaviour
 
     private void Awake()
     {
-        if (CarryVariables.instance == null)
+        if (CarryVariables.instance == null) //if carry variables object isn't around, go to title screen
             SceneManager.LoadScene("Title");
 
         instance = this;
@@ -50,76 +50,72 @@ public class Maze2Generator : MonoBehaviour
 
     void Start()
     {
-        stopwatch = new Stopwatch();
+        stopwatch = new Stopwatch(); //start a stopwatch for amount of time spent
         stopwatch.Start();
 
-        mapX = CarryVariables.instance.settingsToUse.levelSizeX;
-        mapY = CarryVariables.instance.settingsToUse.levelSizeY;
+        mapX = CarryVariables.instance.settingsToUse.levelSizeX+2; //increase numbers by +2
+        mapY = CarryVariables.instance.settingsToUse.levelSizeY+2;
         GenerateMaze();
     }
 
     void GenerateMaze()
     {
         mazeCellMap = new Maze2Cell[mapX, mapY];
+        //center the camera around the middle of the level
         mapCam.transform.position = new Vector3
             (CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapX - 1) / 2,
             Mathf.Max(mapX - 1.5f, mapY - 1.5f) * (CarryVariables.instance.prefabDB.cellPrefab.mazeSize - 1),
             CarryVariables.instance.prefabDB.cellPrefab.mazeSize * (mapY - 1) / 2);
 
-        for (int x = 0; x < mapX; x++)
+        for (int x = 2; x < mapX-2; x++) //offset by 2 because the outer 2 borders will always be filled and I don't want that
         {
-            for (int y = 0; y < mapY; y++)
+            for (int y = 2; y < mapY-2; y++)
             {
                 Maze2Cell cell = Instantiate(CarryVariables.instance.prefabDB.cellPrefab);
                 cell.transform.position = new Vector3(cell.mazeSize * x, 0, cell.mazeSize * y);
 
                 mazeCellMap[x, y] = cell;
-                //Assign the current position to cell
-                cell.Init(x, y);
+                cell.Init(x, y); //Assign the current position to cell
             }
         }
 
+        //choose a random starting position for the player and disable them for now
         Maze2Cell startCell = mazeCellMap[UnityEngine.Random.Range(2, mapX - 2), UnityEngine.Random.Range(2, mapY - 2)];
         Player.instance.gameObject.SetActive(false);
         Player.instance.transform.position = startCell.transform.position;
         unvisitCells.Add(startCell);
 
         RecursiveRandomPrim(startCell);
-
-        for (int i = 0; i < mazeCellMap.GetLength(1); i++)
-        {
-            mazeCellMap[0, i].gameObject.SetActive(false);
-            mazeCellMap[1, i].gameObject.SetActive(false);
-            mazeCellMap[mapX - 1, i].gameObject.SetActive(false);
-            mazeCellMap[mapX - 2, i].gameObject.SetActive(false);
-        }
-        for (int i = 0; i < mazeCellMap.GetLength(0); i++)
-        {
-            mazeCellMap[i, 0].gameObject.SetActive(false);
-            mazeCellMap[i, 1].gameObject.SetActive(false);
-            mazeCellMap[i, mapY - 1].gameObject.SetActive(false);
-            mazeCellMap[i, mapY - 2].gameObject.SetActive(false);
-        }
-
-        AddStuff(startCell);
+        AddOtherStuff(startCell); //after generating cells, add other stuff
     }
 
-    void AddStuff(Maze2Cell startCell)
+    /// <summary>
+    /// add in jewels, spinners, flying cubes, and blanks
+    /// </summary>
+    /// <param name="startCell">player's starting position</param>
+    void AddOtherStuff(Maze2Cell startCell)
     {
-        List<Maze2Cell> availableCells = new();
+        List<Maze2Cell> availableCells = new(); //find all cells that are still usable
         for (int i = 0; i < mazeCellMap.GetLength(0); i++)
         {
             for (int j = 0; j < mazeCellMap.GetLength(1); j++)
             {
-                if (mazeCellMap[i, j].gameObject.activeSelf)
+                try
                 {
-                    availableCells.Add(mazeCellMap[i, j]);
+                    if (mazeCellMap[i, j].gameObject.activeSelf)
+                    {
+                        availableCells.Add(mazeCellMap[i, j]);
+                    }
+                }
+                catch
+                {
+                    continue;
                 }
             }
         }
-        availableCells.Remove(startCell);
+        availableCells.Remove(startCell); //remove player's starting position
 
-        totalJewels = Mathf.Min(CarryVariables.instance.settingsToUse.numJewels, availableCells.Count);
+        totalJewels = Mathf.Min(CarryVariables.instance.settingsToUse.numJewels, availableCells.Count); //calculate number of jewels to use
         jewelText.text = $"Jewels: {0} / {totalJewels}";
 
         for (int i = 0; i < totalJewels; i++) //add jewels
@@ -139,7 +135,7 @@ public class Maze2Generator : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < CarryVariables.instance.settingsToUse.numFlying; i++)
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.numFlying; i++) //add flying cubes
         {
             try
             {
@@ -149,13 +145,13 @@ public class Maze2Generator : MonoBehaviour
                 newFlying.name = $"Flying Cube {i}";
                 availableCells.Remove(randomCell);
             }
-            catch
+            catch //if there aren't enough tiles left, stop
             {
                 break;
             }
         }
 
-        for (int i = 0; i < CarryVariables.instance.settingsToUse.numSpinners; i++)
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.numSpinners; i++) //add spinners
         {
             try
             {
@@ -165,20 +161,27 @@ public class Maze2Generator : MonoBehaviour
                 newSpinner.name = $"Spinner {i}";
                 availableCells.Remove(randomCell);
             }
-            catch
+            catch //if there aren't enough tiles left, stop
             {
                 break;
             }
         }
 
-        for (int i = 0; i < CarryVariables.instance.settingsToUse.blanked; i++)
+        for (int i = 0; i < CarryVariables.instance.settingsToUse.blanked; i++) //remove some tiles
         {
-            Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
-            availableCells.Remove(randomCell);
-            randomCell.gameObject.SetActive(false);
+            try
+            {
+                Maze2Cell randomCell = availableCells[UnityEngine.Random.Range(0, availableCells.Count)];
+                availableCells.Remove(randomCell);
+                randomCell.gameObject.SetActive(false);
+            }
+            catch //if there aren't enough tiles left, stop
+            {
+                break;
+            }
         }
 
-        startCell.gameObject.SetActive(true);
+        startCell.gameObject.SetActive(true); //enable player
         Player.instance.gameObject.SetActive(true);
     }
 
@@ -188,7 +191,6 @@ public class Maze2Generator : MonoBehaviour
         if (!startCell.isVisited)
         {
             startCell.isVisited = true;
-            //This cell will not be a wall cell
             startCell.gameObject.SetActive(false);
 
             //Instant connect from main path, hide the wall cell in between
@@ -211,7 +213,6 @@ public class Maze2Generator : MonoBehaviour
 
             //Standard connection, check unvisited cells nearby start cell
             List<Maze2Cell> neighborUnvisitedCells = CheckCellSurroundings(startCell);
-
 
             if (neighborUnvisitedCells.Count > 0)
             {
@@ -244,7 +245,6 @@ public class Maze2Generator : MonoBehaviour
                 unvisitCells.AddRange(neighborUnvisitedCells);
                 //Since end cell is also changed to visited status, add unvisited cells nearby end cell as well
                 unvisitCells.AddRange(CheckCellSurroundings(endCell));
-
             }
         }
         if (unvisitCells.Count > 0)
@@ -255,12 +255,16 @@ public class Maze2Generator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// //Check if surrounding cells are unvisited and add them to the list, skip over the wall cell (-2/+2)
+    /// </summary>
+    /// <param name="cell"></param>
+    /// <returns></returns>
     List<Maze2Cell> CheckCellSurroundings(Maze2Cell cell)
     {
         List<Maze2Cell> neighborUnvisitedCells = new List<Maze2Cell>();
 
-        //Check if surrounding cells are unvisited and add them to the list, skip over the wall cell (-2/+2)
-        if (cell.locX - 2 > 0)
+        try
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX - 2, cell.locY];
             if (!checkingNeighborCell.isVisited)
@@ -268,8 +272,9 @@ public class Maze2Generator : MonoBehaviour
                 neighborUnvisitedCells.Add(checkingNeighborCell);
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Left;
             }
-        }
-        if (cell.locX + 2 < mapX - 1)
+        } catch { }
+
+        try
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX + 2, cell.locY];
             if (!checkingNeighborCell.isVisited)
@@ -277,8 +282,9 @@ public class Maze2Generator : MonoBehaviour
                 neighborUnvisitedCells.Add(checkingNeighborCell);
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Right;
             }
-        }
-        if (cell.locY - 2 > 0)
+        } catch {}
+
+        try
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX, cell.locY - 2];
             if (!checkingNeighborCell.isVisited)
@@ -286,8 +292,9 @@ public class Maze2Generator : MonoBehaviour
                 neighborUnvisitedCells.Add(checkingNeighborCell);
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Up;
             }
-        }
-        if (cell.locY + 2 < mapY - 1)
+        } catch {}
+
+        try
         {
             Maze2Cell checkingNeighborCell = mazeCellMap[cell.locX, cell.locY + 2];
             if (!checkingNeighborCell.isVisited)
@@ -295,7 +302,7 @@ public class Maze2Generator : MonoBehaviour
                 neighborUnvisitedCells.Add(checkingNeighborCell);
                 checkingNeighborCell.tunnelDirection = Maze2TunnelDirectionIndicator.Down;
             }
-        }
+        } catch { }
 
         return neighborUnvisitedCells;
     }

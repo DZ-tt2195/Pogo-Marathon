@@ -15,6 +15,9 @@ public class LoadScene : MonoBehaviour
         button.onClick.AddListener(Load);
     }
 
+    /// <summary>
+    /// button that loads the next scene
+    /// </summary>
     void Load()
     {
         SceneManager.LoadScene(sceneToLoad);
