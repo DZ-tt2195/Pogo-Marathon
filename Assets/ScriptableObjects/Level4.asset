@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 757caab5e0a304f50beccb99d1714720, type: 3}
   m_Name: Level4
   m_EditorClassIdentifier: 
-  levelSizeX: 30
-  levelSizeY: 30
-  numJewels: 30
+  levelSizeX: 25
+  levelSizeY: 25
+  numJewels: 25
   numFlying: 10
   numSpinners: 15
-  blanked: 75
+  blanked: 60
   tutorial: This is the last main level, but you can customize the settings however
     you lile.

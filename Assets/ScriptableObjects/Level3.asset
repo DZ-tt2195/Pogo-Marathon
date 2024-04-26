@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 757caab5e0a304f50beccb99d1714720, type: 3}
   m_Name: Level3
   m_EditorClassIdentifier: 
-  levelSizeX: 20
-  levelSizeY: 20
+  levelSizeX: 12
+  levelSizeY: 17
   numJewels: 20
-  numFlying: 5
-  numSpinners: 5
-  blanked: 20
+  numFlying: 4
+  numSpinners: 4
+  blanked: 15
   tutorial: Watch out for the spinners!
